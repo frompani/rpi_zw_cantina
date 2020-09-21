@@ -1,0 +1,8 @@
+/home/pi/log/leggi_ds18b20.log {
+  rotate 12
+  monthly
+  compress
+  missingok
+  notifempty
+}
+

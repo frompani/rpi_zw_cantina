@@ -1,0 +1,10 @@
+per un qualcosa legato a ipv6 , il syslog si riempe di messaggi del tipo 
+
+Jun 7 17:10:18 localhost dhcpcd[1585]: wlan0: adding default route via fe80::1:1
+Jun 7 17:10:18 localhost dhcpcd[1585]: wlan0: deleted default route via fe80::1:1
+
+ho risolto togliendo ipv6 seguendo questa guida : google :pi disable ipv6
+https://cwesystems.com/?p=231
+
+
+
