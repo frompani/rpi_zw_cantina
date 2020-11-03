@@ -1,0 +1,37 @@
+#!/bin/bash
+
+
+#sudo modprobe w1-gpio && sudo modprobe w1_therm
+
+
+t_ext_muro=`cat /sys/bus/w1/devices/28-80000026d080/w1_slave | sed -n 's/^.*\(t=[^ ]*\).*/\1/p' | sed 's/t=//' | awk '{x=$1}END{print(x/1000)}'`
+t_ext_aria=`cat /sys/bus/w1/devices/28-80000026fd33/w1_slave | sed -n 's/^.*\(t=[^ ]*\).*/\1/p' | sed 's/t=//' | awk '{x=$1}END{print(x/1000)}'`
+t_bollitore=`cat /sys/bus/w1/devices/28-800000270667/w1_slave | sed -n 's/^.*\(t=[^ ]*\).*/\1/p' | sed 's/t=//' | awk '{x=$1}END{print(x/1000)}'`
+t_cantina=`cat /sys/bus/w1/devices/28-00000869203d/w1_slave | sed -n 's/^.*\(t=[^ ]*\).*/\1/p' | sed 's/t=//' | awk '{x=$1}END{print(x/1000)}'`
+t_pannello=`cat /sys/bus/w1/devices/28-00000868a62b/w1_slave | sed -n 's/^.*\(t=[^ ]*\).*/\1/p' | sed 's/t=//' | awk '{x=$1}END{print(x/1000)}'`
+#################################################################
+##check se dati ok
+#################################################################
+t_cant=`cat /sys/bus/w1/devices/28-00000869203d/w1_slave | sed -n 's/^.*\(t=[^ ]*\).*/\1/p' | sed 's/t=//' `
+t_boll=`cat /sys/bus/w1/devices/28-800000270667/w1_slave | sed -n 's/^.*\(t=[^ ]*\).*/\1/p' | sed 's/t=//' ` 
+echo $t_cant 
+echo $t_boll
+
+if [ $t_boll -lt 5000 ]; then
+    exit 1
+fi
+if [ $t_cant -gt 50000 ]; then
+    exit 1
+fi
+#################################################################
+##update MYSQL
+#################################################################
+wget -qO- http://192.168.10.180/tana/add_1.php?t_ext_aria=$t_ext_aria\&t_ext_muro=$t_ext_muro\&t_int_muro=0\&t_bollitore=$t_bollitore\&t_pannello=$t_pannello\&t_cantina=$t_cantina &> /dev/null
+#################################################################
+##update DOMOTICZ
+#################################################################
+curl -s "http://192.168.10.181:8888/json.htm?type=command&param=udevice&idx=15&nvalue=0&svalue=$t_ext_aria"
+curl -s "http://192.168.10.181:8888/json.htm?type=command&param=udevice&idx=20&nvalue=0&svalue=$t_ext_muro"
+curl -s "http://192.168.10.181:8888/json.htm?type=command&param=udevice&idx=16&nvalue=0&svalue=$t_bollitore"
+curl -s "http://192.168.10.181:8888/json.htm?type=command&param=udevice&idx=18&nvalue=0&svalue=$t_cantina"
+curl -s "http://192.168.10.181:8888/json.htm?type=command&param=udevice&idx=19&nvalue=0&svalue=$t_pannello"
